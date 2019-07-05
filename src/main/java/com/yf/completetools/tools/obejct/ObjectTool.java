@@ -1,8 +1,7 @@
-package com.yf.completetools.obejct;
+package com.yf.completetools.tools.obejct;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.junit.Test;
 
 import java.util.Objects;
 
