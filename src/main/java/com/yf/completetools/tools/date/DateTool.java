@@ -3,18 +3,17 @@ package com.yf.completetools.tools.date;
 import com.yf.completetools.constants.WeekEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.junit.Test;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author: yefei
@@ -72,39 +71,59 @@ public class DateTool {
     }
 
     @ApiOperation("将Date转换为LocalDate")
-    public static LocalDate parseLocalDate(Date date) {
+    public static LocalDate parseToLocalDate(Date date) {
         Instant instant = date.toInstant();
         ZoneId zoneId = ZoneId.systemDefault();
         return instant.atZone(zoneId).toLocalDate();
     }
 
     @ApiOperation("将LocalDate转换为Date")
-    public static Date parseDate(LocalDate date) {
+    public static Date parseToDate(LocalDate date) {
         ZoneId zone = ZoneId.systemDefault();
         Instant instant = date.atStartOfDay().atZone(zone).toInstant();
         return Date.from(instant);
     }
 
+    /**
+     * 获取一个时间段内所有日期（包含起始日期）
+     *
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     @ApiOperation("获取一个时间段的所有日期")
-    public List<Date> getDateList(Date startDate, Date endDate) {
+    public static List<Date> getDateList(Date startDate, Date endDate) {
         List<LocalDate> dateList = new ArrayList<>();
-        LocalDate startLocalDate = parseLocalDate(startDate);
-        LocalDate endLocalDate = parseLocalDate(endDate);
+        LocalDate startLocalDate = parseToLocalDate(startDate);
+        LocalDate endLocalDate = parseToLocalDate(endDate);
         while (startLocalDate.isBefore(endLocalDate) || startLocalDate.isEqual(endLocalDate)) {
             dateList.add(startLocalDate);
             startLocalDate = startLocalDate.plusDays(1);
         }
-        return dateList.stream().map(i -> parseDate(i)).collect(Collectors.toList());
+        return dateList.stream().map(i -> parseToDate(i)).collect(Collectors.toList());
     }
 
-
-    @Test
-    public void test() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        System.out.println(isWeekend(sdf.parse("2017-05-19")));
-        System.out.println(getWeekDay(sdf.parse("2017-05-19")));
-
+    @ApiOperation("获取当前周第一天的日期")
+    public static Date getFirstDayOfCurrentWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, 2);
+        return calendar.getTime();
     }
 
+    public static List<Date> getBetweenDate(Date start, Date end) {
+        List<Date> list = new ArrayList<>();
+        LocalDate localDateStart = parseToLocalDate(start);
+        LocalDate localDateEnd = parseToLocalDate(end);
+        long distance = ChronoUnit.DAYS.between(localDateStart, localDateEnd);
+        if (distance < 1) {
+            return list;
+        }
+        Stream.iterate(localDateStart, d -> {
+            return d.plusDays(1);
+        }).limit(distance + 1).forEach(i -> {
+            list.add(parseToDate(i));
+        });
+        return list;
+    }
 
 }
