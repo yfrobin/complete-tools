@@ -7,5 +7,7 @@ package com.yf.completetools.tools.http;
  */
 public class RequestTool {
 
+    public void say(){
 
+    }
 }
